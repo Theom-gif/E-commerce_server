@@ -1,12 +1,14 @@
 <?php
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\OrderController;
 
+Route::post('/assistant', [AssistantController::class, 'respond']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::get('/products', [ProductController::class, 'index']);
@@ -15,8 +17,8 @@ Route::get('/products/search/{keyword}', [ProductController::class, 'search']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cart', [CartController::class, 'index']);
     Route::post('/cart', [CartController::class, 'store']);
-    Route::put('/cart/{id}', [CartController::class, 'update']);
-    Route::delete('/cart/{id}', [CartController::class, 'destroy']);
+    Route::put('/cart/{cart}', [CartController::class, 'update']);
+    Route::delete('/cart/{cart}', [CartController::class, 'destroy']);
 });
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index']);
@@ -26,7 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/checkout', [OrderController::class, 'checkout']);
     Route::get('/orders', [OrderController::class, 'index']);
-    Route::get('/orders/{id}', [OrderController::class, 'show']);
+    Route::get('/orders/{order}', [OrderController::class, 'show']);
 });
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']);

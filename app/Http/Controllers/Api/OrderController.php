@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,9 +11,9 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $request->user()->orders()->latest()->get();
+        return response()->json($request->user()->orders()->with('items.product')->latest()->get());
     }
 
     /**
@@ -36,9 +35,11 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Order $order)
+    public function show(Request $request, Order $order)
     {
-        return $request->user()->orders()->with('items.product')->findOrFail($id);
+        abort_unless($order->user_id === $request->user()->id, 403);
+
+        return response()->json($order->load('items.product'));
     }
 
     /**
@@ -96,6 +97,6 @@ class OrderController extends Controller
             $user->cart()->delete();
         });
 
-        return response()->json(['message' => 'Order placed', 'order' => $order->load('items')]);
+        return response()->json(['message' => 'Order placed', 'order' => $order->load('items.product')]);
     }
 }

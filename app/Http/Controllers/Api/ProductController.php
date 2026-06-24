@@ -10,15 +10,23 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $query = Product::with('category');
 
-        if ($request->has('category_id')) {
-        $query->where('category_id', $request->category_id);
-    }
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->integer('category_id'));
+        }
 
-    return response()->json($query->paginate(12));
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $query->where(function ($builder) use ($search) {
+                $builder->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        return response()->json($query->latest()->paginate(12));
     }
 
     /**
@@ -40,7 +48,7 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Product $product)
+    public function show($id)
     {
         $product = Product::with('category', 'reviews.user')->findOrFail($id);
         return response()->json($product);
@@ -70,8 +78,13 @@ class ProductController extends Controller
         //
     }
     public function search($keyword)
-{
-    $products = Product::where('name', 'like', "%$keyword%")->get();
-    return response()->json($products);
-}
+    {
+        $products = Product::with('category')
+            ->where('name', 'like', "%{$keyword}%")
+            ->orWhere('description', 'like', "%{$keyword}%")
+            ->limit(12)
+            ->get();
+
+        return response()->json($products);
+    }
 }

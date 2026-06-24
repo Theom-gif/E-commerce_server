@@ -10,9 +10,9 @@ class WishlistController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $request->user()->wishlists()->with('product')->get();
+        return response()->json($request->user()->wishlists()->with('product.category')->latest()->get());
     }
 
     /**
@@ -26,7 +26,7 @@ class WishlistController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, $productId)
     {
         $request->user()->wishlists()->firstOrCreate(['product_id' => $productId]);
         return response()->json(['message' => 'Added to wishlist']);
@@ -59,9 +59,9 @@ class WishlistController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Wishlist $wishlist)
+    public function destroy(Request $request, $productId)
     {
         $request->user()->wishlists()->where('product_id', $productId)->delete();
         return response()->json(['message' => 'Removed from wishlist']);
-}
+    }
 }

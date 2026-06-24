@@ -10,9 +10,9 @@ class CartController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $request->user()->cart()->with('product')->get();
+        return response()->json($request->user()->cart()->with('product.category')->latest()->get());
     }
 
     /**
@@ -28,12 +28,16 @@ class CartController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate(['product_id' => 'required', 'quantity' => 'required|integer|min:1']);
-        $cart = $request->user()->cart()->firstOrNew(['product_id' => $request->product_id]);
-        $cart->quantity = ($cart->quantity ?? 0) + $request->quantity;
+        $validated = $request->validate([
+            'product_id' => ['required', 'exists:products,id'],
+            'quantity' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $cart = $request->user()->cart()->firstOrNew(['product_id' => $validated['product_id']]);
+        $cart->quantity = ($cart->exists ? (int) $cart->quantity : 0) + ($validated['quantity'] ?? 1);
         $cart->save();
 
-    return response()->json($cart);
+        return response()->json($cart->load('product.category'));
     }
 
     /**
@@ -57,17 +61,26 @@ class CartController extends Controller
      */
     public function update(Request $request, Cart $cart)
     {
-            $cart = $request->user()->cart()->findOrFail($id);
-            $cart->update(['quantity' => $request->quantity]);
-            return response()->json($cart);
+        $validated = $request->validate([
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        abort_unless($cart->user_id === $request->user()->id, 403);
+
+        $cart->update(['quantity' => $validated['quantity']]);
+
+        return response()->json($cart->load('product.category'));
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Cart $cart)
+    public function destroy(Request $request, Cart $cart)
     {
-        $request->user()->cart()->where('id', $id)->delete();
+        abort_unless($cart->user_id === $request->user()->id, 403);
+
+        $cart->delete();
+
         return response()->json(['message' => 'Removed from cart']);
     }
 }

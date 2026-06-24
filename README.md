@@ -1,59 +1,310 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# E-Commerce Backend API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This project is a Laravel backend for an e-commerce website. It provides real data for:
 
-## About Laravel
+- products
+- categories
+- cart
+- checkout
+- wishlist
+- orders
+- reviews
+- authentication
+- a lightweight AI/store assistant endpoint
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The frontend can connect to this backend through JSON API requests.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Base URL
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+If you run the backend locally with Artisan, the API is usually available at:
 
-## Learning Laravel
+```text
+http://localhost:8000/api
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Admin pages are under:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```text
+http://localhost:8000/admin
+```
 
-## Laravel Sponsors
+## Setup
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. Install dependencies.
+2. Copy `.env.example` to `.env`.
+3. Set your database credentials in `.env`.
+4. Run:
 
-### Premium Partners
+```bash
+php artisan key:generate
+php artisan migrate
+php artisan serve
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Frontend Connection
 
-## Contributing
+If your frontend is in React, Vue, Next.js, or another SPA, create a small API client and point it to the Laravel backend.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Example using Axios:
 
-## Code of Conduct
+```js
+import axios from "axios";
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api",
+});
 
-## Security Vulnerabilities
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+export default api;
+```
 
-## License
+## Auth Flow
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This backend uses Laravel Sanctum personal access tokens.
+
+### Login
+
+```http
+POST /api/login
+```
+
+Request body:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "password"
+}
+```
+
+Response includes:
+
+- `user`
+- `token`
+
+Save the token in `localStorage` or your preferred auth store, then send it in:
+
+```http
+Authorization: Bearer YOUR_TOKEN
+```
+
+### Register
+
+```http
+POST /api/register
+```
+
+### Logout
+
+```http
+POST /api/logout
+```
+
+Requires authentication.
+
+## Main API Endpoints
+
+### Public endpoints
+
+```http
+GET /api/categories
+GET /api/categories/{category}
+GET /api/products
+GET /api/products/{id}
+GET /api/products/search/{keyword}
+GET /api/products/{id}/reviews
+POST /api/register
+POST /api/login
+POST /api/assistant
+```
+
+### Authenticated endpoints
+
+```http
+GET /api/cart
+POST /api/cart
+PUT /api/cart/{cart}
+DELETE /api/cart/{cart}
+
+GET /api/wishlist
+POST /api/wishlist/{productId}
+DELETE /api/wishlist/{productId}
+
+POST /api/checkout
+GET /api/orders
+GET /api/orders/{order}
+
+GET /api/profile
+PUT /api/profile
+PUT /api/change-password
+POST /api/logout
+```
+
+## Real Data Usage
+
+### Get all categories
+
+```js
+const { data } = await api.get("/categories");
+```
+
+### Get all products
+
+```js
+const { data } = await api.get("/products");
+```
+
+### Filter products by category
+
+```js
+const { data } = await api.get("/products", {
+  params: { category_id: 1 },
+});
+```
+
+### Search products
+
+```js
+const { data } = await api.get("/products", {
+  params: { search: "shoes" },
+});
+```
+
+### Add item to cart
+
+```js
+await api.post("/cart", {
+  product_id: 12,
+  quantity: 2,
+});
+```
+
+### Checkout
+
+```js
+const { data } = await api.post("/checkout");
+```
+
+## AI / Store Assistant
+
+This backend includes a simple assistant endpoint that can help the frontend communicate with the store.
+
+It can respond to requests like:
+
+- "show me products"
+- "what categories do you have?"
+- "check my cart"
+- "I want to checkout"
+
+### Request
+
+```http
+POST /api/assistant
+```
+
+Example body:
+
+```json
+{
+  "message": "show me running shoes"
+}
+```
+
+Optional body:
+
+```json
+{
+  "message": "I want to checkout",
+  "limit": 5
+}
+```
+
+### Response
+
+The response includes:
+
+- `intent`
+- `message`
+- `categories`
+- `products`
+- `actions`
+- `query`
+
+Example frontend usage:
+
+```js
+const { data } = await api.post("/assistant", {
+  message: userInput,
+});
+
+setChatReply(data.message);
+setSuggestedProducts(data.products);
+setSuggestedCategories(data.categories);
+setActions(data.actions);
+```
+
+### How to use it in the UI
+
+You can build a chat box or assistant panel like this:
+
+1. User types a message.
+2. Frontend sends the message to `POST /api/assistant`.
+3. Backend returns real product/category/cart guidance.
+4. Frontend shows the response as chat text, product cards, or action buttons.
+
+This assistant is stateless, so the frontend should store the conversation history if you want a chat-like experience.
+
+## Suggested Frontend Structure
+
+Recommended files in the frontend app:
+
+```text
+src/api/client.js
+src/api/auth.js
+src/api/products.js
+src/api/cart.js
+src/api/assistant.js
+src/components/ProductCard.jsx
+src/components/CategoryCard.jsx
+src/components/ChatAssistant.jsx
+```
+
+## Example Assistant Client
+
+```js
+import api from "./client";
+
+export async function askAssistant(message) {
+  const { data } = await api.post("/assistant", { message });
+  return data;
+}
+```
+
+## Notes
+
+- This backend currently uses bearer token authentication through Sanctum.
+- If the frontend is on a different origin, make sure the browser can reach the backend API URL.
+- If you want cookie-based SPA auth instead of bearer tokens, that can be added later.
+
+## Tests
+
+Run the backend tests with:
+
+```bash
+php artisan test
+```
+
+## Need a Frontend Starter?
+
+If you want, I can also create:
+
+1. a React frontend API service layer
+2. a chat UI for the assistant
+3. a full product listing and cart page connected to this backend
