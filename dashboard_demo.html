@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Analytics Dashboard Demo</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --panel: #ffffff;
+    --text: #111827;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #4f46e5;
+    --accent-soft: #eef2ff;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --sidebar: #ffffff;
+    --row-1: #f9fafb;
+    --row-2: #ffffff;
+    --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  }
+  [data-theme="dark"] {
+    --bg: #0b0f17;
+    --panel: #111827;
+    --text: #f9fafb;
+    --muted: #9ca3af;
+    --border: #1f2937;
+    --accent: #818cf8;
+    --accent-soft: #1f2433;
+    --success: #34d399;
+    --danger: #f87171;
+    --warn: #fbbf24;
+    --sidebar: #0b0f17;
+    --row-1: #0f1520;
+    --row-2: #111827;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+  }
+  .sidebar {
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    padding: 22px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 18px;
+  }
+  .brand .mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg,#6366f1,#3b82f6);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+  }
+  .nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .nav a {
+    text-decoration: none;
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+  }
+  .nav a.active {
+    background: #eef2ff;
+    color: #1f2937;
+    font-weight: 600;
+  }
+  [data-theme="dark"] .nav a.active {
+    background: #1f2433;
+    color: #eef2ff;
+  }
+  .support {
+    margin-top: auto;
+    background: linear-gradient(180deg,#eef2ff,#ffffff);
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 14px;
+    color: #111827;
+  }
+  [data-theme="dark"] .support {
+    background: linear-gradient(180deg,#1f2433,#111827);
+    border-color: #1f2937;
+    color: #f9fafb;
+  }
+  .support .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #e5e7eb;
+    margin-bottom: 8px;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .support p { margin: 0 0 10px; font-size: 13px; }
+  .support button {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: 0;
+    background: #4f46e5;
+    color: white;
+    font-weight: 600;
+  }
+  .main {
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .topbar h1 { margin: 0; font-size: 22px; }
+  .topbar .actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .range, .user {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+  .grid {
+    display: grid;
+    gap: 14px;
+  }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .kpi .label { color: var(--muted); font-size: 12px; }
+  .kpi .value { font-size: 22px; font-weight: 700; margin-top: 6px; }
+  .kpi .delta { font-size: 12px; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; }
+  .delta.up { color: var(--success); }
+  .delta.down { color: var(--danger); }
+  .donut {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent) 0 70%, #e5e7eb 70% 100%);
+    margin-top: 12px;
+  }
+  .donut.yellow { background: conic-gradient(var(--warn) 0 65%, #e5e7eb 65% 100%); }
+  .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+  .bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 160px;
+  }
+  .bars .bar {
+    flex: 1;
+    border-radius: 8px 8px 4px 4px;
+    background: linear-gradient(180deg,#6366f1,#818cf8);
+    opacity: 0.9;
+  }
+  .line {
+    height: 160px;
+    position: relative;
+  }
+  .line svg { width: 100%; height: 100%; }
+  .table-wrap { overflow: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--muted); font-weight: 600; }
+  tbody tr:nth-child(odd) { background: #11182708; }
+  [data-theme="dark"] tbody tr:nth-child(odd) { background: #1f2433; }
+  tbody tr:nth-child(even) { background: #ffffff; }
+  [data-theme="dark"] tbody tr:nth-child(even) { background: #111827; }
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge.delivered { background:#d1fae5; color:#065f46; }
+  .badge.processed { background:#fff7ed; color:#9a3412; }
+  .badge.cancelled { background:#fee2e2; color:#991b1b; }
+  [data-theme="dark"] .badge.delivered { background:#064e3b; color:#ecfdf5; }
+  [data-theme="dark"] .badge.processed { background:#7c2d12; color:#fff7ed; }
+  [data-theme="dark"] .badge.cancelled { background:#7f1d1d; color:#fee2e2; }
+  .user-cell { display:flex; align-items:center; gap:10px; }
+  .user-cell .pic {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #e5e7eb; display: grid; place-items: center; font-weight: 700; font-size: 12px;
+  }
+  [data-theme="dark"] .user-cell .pic { background: #374151; color: #f9fafb; }
+  .money { font-weight: 700; }
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; }
+    .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">B</div>
+      <span>Business</span>
+    </div>
+    <nav class="nav">
+      <a href="#" class="active">Analytics</a>
+      <a href="#">Products</a>
+      <a href="#">Messages</a>
+      <a href="#">Customers</a>
+      <a href="#">Settings</a>
+      <a href="#">Sign Out</a>
+    </nav>
+    <div class="support">
+      <div class="avatar">?</div>
+      <p>Need help? Feel free to contact support.</p>
+      <button>Get support</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h1>Analytics</h1>
+      <div class="actions">
+        <div class="range">01.08.2022 - 31.08.2022</div>
+        <button class="icon-btn" id="themeBtn" title="Toggle theme">◐</button>
+        <div class="user">Kristi Kamlykova</div>
+      </div>
+    </div>
+
+    <div class="grid grid-4">
+      <div class="card kpi">
+        <div class="label">Orders</div>
+        <div class="value">201</div>
+        <div class="delta up">↑ 8.2%</div>
+      </div>
+      <div class="card kpi">
+        <div class="label">Approved</div>
+        <div class="value">36</div>
+        <div class="delta up">↑ 3.4%</div>
+      </div>
+      <div class="card kpi">
+        <div class="label">Users</div>
+        <div class="value">4.890</div>
+        <div class="label" style="margin-top:6px">since last month</div>
+        <div class="donut yellow"></div>
+      </div>
+      <div class="card kpi">
+        <div class="label">Subscriptions</div>
+        <div class="value">1.201</div>
+        <div class="label" style="margin-top:6px">since last month</div>
+        <div class="donut"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="chart-title">Sales dynamics</div>
+        <div class="bars">
+          <div class="bar" style="height:45%"></div>
+          <div class="bar" style="height:60%"></div>
+          <div class="bar" style="height:55%"></div>
+          <div class="bar" style="height:70%"></div>
+          <div class="bar" style="height:65%"></div>
+          <div class="bar" style="height:80%"></div>
+          <div class="bar" style="height:75%"></div>
+          <div class="bar" style="height:85%"></div>
+          <div class="bar" style="height:90%"></div>
+          <div class="bar" style="height:100%"></div>
+          <div class="bar" style="height:95%"></div>
+          <div class="bar" style="height:88%"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Overall User Activity</div>
+        <div class="line">
+          <svg viewBox="0 0 400 160" preserveAspectRatio="none">
+            <path d="M0,140 C40,130 70,110 110,100 S170,70 210,60 S270,40 320,30 S380,20 400,15" fill="none" stroke="#7c3aed" stroke-width="3"/>
+            <path d="M0,140 C40,130 70,110 110,100 S170,70 210,60 S270,40 320,30 S380,20 400,15 V160 H0 Z" fill="#7c3aed" opacity="0.08"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="label">Paid Invoices</div>
+        <div class="value" style="margin-top:8px">$30,256.23</div>
+        <div class="delta up" style="margin-top:8px">+15%</div>
+      </div>
+      <div class="card">
+        <div class="label">Funds received</div>
+        <div class="value" style="margin-top:8px">$150,256.23</div>
+        <div class="delta up" style="margin-top:8px">+59%</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chart-title">Customer order</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Profile</th>
+              <th>Address</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th style="text-align:right">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <div class="pic">P</div>
+                  <span>Press</span>
+                </div>
+              </td>
+              <td>London</td>
+              <td>22.08.2022</td>
+              <td><span class="badge delivered">Delivered</span></td>
+              <td class="money" style="text-align:right">$920</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <div class="pic">M</div>
+                  <span>Marina</span>
+                </div>
+              </td>
+              <td>Man city</td>
+              <td>24.08.2022</td>
+              <td><span class="badge processed">Processed</span></td>
+              <td class="money" style="text-align:right">$452</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <div class="pic">A</div>
+                  <span>Alex</span>
+                </div>
+              </td>
+              <td>Unknown</td>
+              <td>18.08.2022</td>
+              <td><span class="badge cancelled">Cancelled</span></td>
+              <td class="money" style="text-align:right">$1,200</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <div class="pic">R</div>
+                  <span>Robert</span>
+                </div>
+              </td>
+              <td>New York</td>
+              <td>03.08.2022</td>
+              <td><span class="badge delivered">Delivered</span></td>
+              <td class="money" style="text-align:right">$1,235</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+  const btn = document.getElementById('themeBtn');
+  const root = document.documentElement;
+  btn.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+  });
+</script>
+</body>
+</html>

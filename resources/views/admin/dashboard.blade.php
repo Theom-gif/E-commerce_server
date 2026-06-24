@@ -1,215 +1,474 @@
 @extends('admin.layout')
+
 @section('title', 'Dashboard')
 
 @push('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  .db * { box-sizing: border-box; }
+  :root {
+    --card: #ffffff;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.09);
+    --radius-sm: 10px;
+  }
 
-  /* ── KPI grid ─────────────────────────────────── */
-  .db-kpis {
+  .page-header {
+    margin-bottom: 18px;
+  }
+
+  .page-header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .page-header p {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 14px;
+    margin-bottom: 18px;
   }
-  @media(max-width:960px) { .db-kpis { grid-template-columns: repeat(2,1fr); } }
-  @media(max-width:500px) { .db-kpis { grid-template-columns: 1fr; } }
 
-  .db-kpi {
-    border-radius: 14px;
-    padding: 20px;
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
     position: relative;
     overflow: hidden;
-    transition: transform .18s ease, box-shadow .18s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .db-kpi:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.10); }
 
-  .db-kpi.--indigo { background: #6366F1; }
-  .db-kpi.--green  { background: #10B981; }
-  .db-kpi.--amber  { background: #F59E0B; }
-  .db-kpi.--purple { background: #8B5CF6; }
+  .kpi:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
 
-  /* Subtle inner glow circle */
-  .db-kpi::after {
+  .kpi::before {
     content: '';
     position: absolute;
-    top: -20px; right: -20px;
-    width: 100px; height: 100px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.12);
-    pointer-events: none;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 4px;
+    border-radius: 0 4px 4px 0;
   }
 
-  .db-kpi-icon {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    background: rgba(255,255,255,.2);
-    display: grid; place-items: center;
-    color: #fff; font-size: 15px;
-    margin-bottom: 14px;
+  .kpi.blue   { background: linear-gradient(135deg,#eff6ff,#ffffff); border-color: #bfdbfe; }
+  .kpi.blue::before { background: linear-gradient(180deg,#3b82f6,#2563eb); }
+
+  .kpi.green  { background: linear-gradient(135deg,#ecfdf5,#ffffff); border-color: #a7f3d0; }
+  .kpi.green::before { background: linear-gradient(180deg,#10b981,#059669); }
+
+  .kpi.purple { background: linear-gradient(135deg,#f5f3ff,#ffffff); border-color: #ddd6fe; }
+  .kpi.purple::before { background: linear-gradient(180deg,#8b5cf6,#7c3aed); }
+
+  .kpi.orange { background: linear-gradient(135deg,#fff7ed,#ffffff); border-color: #fed7aa; }
+  .kpi.orange::before { background: linear-gradient(180deg,#f97316,#ea580c); }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
   }
-  .db-kpi-label {
-    font-size: 11px; font-weight: 600;
-    letter-spacing: .08em; text-transform: uppercase;
-    color: rgba(255,255,255,.75);
-    margin: 0 0 6px;
+
+  .kpi-value {
+    margin-top: 8px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: var(--text);
   }
-  .db-kpi-value {
-    font-size: 30px; font-weight: 800;
-    color: #fff; line-height: 1;
-    letter-spacing: -1px; margin: 0 0 6px;
+
+  .kpi-sub {
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #10b981;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
-  .db-kpi-sub {
+
+  .kpi-sub::before {
+    content: '↗';
     font-size: 12px;
-    color: rgba(255,255,255,.65);
   }
 
-  /* ── Bottom grid ──────────────────────────────── */
-  .db-grid {
+  .kpi-icon {
+    position: absolute;
+    right: 14px;
+    top: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
+    place-items: center;
+    font-size: 17px;
+    color: #ffffff;
   }
 
-  .db-panel {
-    border: 1px solid #E2E8F0;
-    border-radius: 14px;
+  .kpi.blue .kpi-icon   { background: linear-gradient(135deg,#3b82f6,#2563eb); box-shadow: 0 4px 12px rgba(59,130,246,.3); }
+  .kpi.green .kpi-icon  { background: linear-gradient(135deg,#10b981,#059669); box-shadow: 0 4px 12px rgba(16,185,129,.3); }
+  .kpi.purple .kpi-icon { background: linear-gradient(135deg,#8b5cf6,#7c3aed); box-shadow: 0 4px 12px rgba(139,92,246,.3); }
+  .kpi.orange .kpi-icon { background: linear-gradient(135deg,#f97316,#ea580c); box-shadow: 0 4px 12px rgba(249,115,22,.3); }
+
+  .panels {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 14px;
+  }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 320px;
   }
-  .db-panel-head {
-    padding: 14px 18px;
-    border-bottom: 1px solid #E2E8F0;
-    background: #F8FAFC;
-    display: flex; align-items: center;
+
+  .panel-head {
+    display: flex;
+    align-items: center;
     justify-content: space-between;
+    padding: 14px 18px;
+    background: #fafafa;
+    border-bottom: 1px solid #f3f4f6;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
   }
-  .db-panel-head h3 {
-    font-size: 13px; font-weight: 700;
-    color: #0F172A; margin: 0;
-  }
-  .db-panel-body { padding: 0 18px; }
 
-  /* Table inside panel */
-  .db-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .db-table thead th {
-    font-size: 10.5px; font-weight: 700;
-    letter-spacing: .08em; text-transform: uppercase;
-    color: #94A3B8;
-    padding: 12px 0 10px;
-    border-bottom: 1px solid #F1F5F9;
-    text-align: left;
+  .panel-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #f3f4f6;
   }
-  .db-table thead th:last-child { text-align: right; }
-  .db-table tbody tr { border-bottom: 1px solid #F1F5F9; }
-  .db-table tbody tr:last-child { border-bottom: none; }
-  .db-table tbody td { padding: 11px 0; color: #1E293B; vertical-align: middle; }
-  .db-table tbody td:last-child { text-align: right; color: #64748B; font-weight: 600; }
 
-  .db-cat-dot {
-    display: inline-block;
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    margin-right: 8px;
-    vertical-align: middle;
+  .panel-legend::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: linear-gradient(135deg,#8b5cf6,#7c3aed);
+    box-shadow: 0 1px 3px rgba(139,92,246,.35);
   }
-  .db-empty { text-align: center; color: #94A3B8; padding: 32px 0; font-size: 13px; }
 
-  /* Live badge */
-  .db-live {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: #ECFDF5; color: #059669;
-    font-size: 11px; font-weight: 700;
-    padding: 3px 10px; border-radius: 999px;
+  .panel-body {
+    flex: 1;
+    padding: 16px 18px;
+    overflow-y: auto;
   }
-  .db-live-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: #10B981;
-    animation: pulse 1.8s ease infinite;
+
+  .chart-box {
+    position: relative;
+    width: 100%;
+    height: 260px;
   }
-  @keyframes pulse {
-    0%,100% { opacity: 1; }
-    50%      { opacity: .3; }
+
+  .chart-box canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .status-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 12px;
+    background: #f9fafb;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    transition: 0.12s ease;
+  }
+
+  .status-row:hover {
+    background: #fff;
+    border-color: var(--border);
+    box-shadow: var(--shadow);
+  }
+
+  .status-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+
+  .status-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: #111827;
+    text-transform: capitalize;
+  }
+
+  .status-pill {
+    font-size: 12px;
+    font-weight: 700;
+    color: #111827;
+    background: #fff;
+    padding: 3px 10px;
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+    min-width: 44px;
+    text-align: center;
+  }
+
+  .empty {
+    color: #94a3b8;
+    text-align: center;
+    padding: 40px 0;
+    font-size: 14px;
+  }
+
+  @media (max-width: 1366px) {
+    .kpi-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .panels { gap: 10px; }
+  }
+
+  @media (max-width: 1200px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .panels { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .panel { min-height: 260px; }
+    .chart-box { height: 220px; }
+  }
+
+  @media (max-width: 480px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .panel { min-height: auto; }
+    .chart-box { height: 210px; }
   }
 </style>
 @endpush
 
 @section('content')
-<div class="db">
-
-  {{-- Page title row --}}
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-    <div>
-      <h1 style="font-size:20px;font-weight:700;color:#0F172A;margin:0 0 2px;">Dashboard</h1>
-      <p style="font-size:13px;color:#64748B;margin:0;">Welcome back. Here is your business overview.</p>
-    </div>
-    <span class="db-live"><span class="db-live-dot"></span> Live</span>
-  </div>
-
-  {{-- KPI Cards --}}
-  <div class="db-kpis">
-    <div class="db-kpi --indigo">
-      <div class="db-kpi-icon"><i class="fas fa-dollar-sign"></i></div>
-      <p class="db-kpi-label">Total Revenue</p>
-      <p class="db-kpi-value">${{ number_format($totalRevenue, 2) }}</p>
-      <p class="db-kpi-sub">Avg order: ${{ number_format($averageOrderValue, 2) }}</p>
+<div class="main-inner">
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <p>Welcome back! Here's your business overview.</p>
     </div>
 
-    <div class="db-kpi --green">
-      <div class="db-kpi-icon"><i class="fas fa-shopping-bag"></i></div>
-      <p class="db-kpi-label">Total Orders</p>
-      <p class="db-kpi-value">{{ number_format($totalOrders) }}</p>
-      <p class="db-kpi-sub">Lifetime orders placed</p>
-    </div>
-
-    <div class="db-kpi --amber">
-      <div class="db-kpi-icon"><i class="fas fa-box"></i></div>
-      <p class="db-kpi-label">Total Products</p>
-      <p class="db-kpi-value">{{ number_format($totalProducts) }}</p>
-      <p class="db-kpi-sub">Active listings</p>
-    </div>
-
-    <div class="db-kpi --purple">
-      <div class="db-kpi-icon"><i class="fas fa-folder"></i></div>
-      <p class="db-kpi-label">Total Categories</p>
-      <p class="db-kpi-value">{{ number_format($totalCategories) }}</p>
-      <p class="db-kpi-sub">Product categories</p>
-    </div>
-  </div>
-
-  {{-- Bottom panels --}}
-  <div class="db-grid">
-    <div class="db-panel">
-      <div class="db-panel-head">
-        <h3>Top Categories</h3>
+    <div class="kpi-grid">
+      <div class="kpi blue">
+        <div>
+          <div class="kpi-label">Total Users</div>
+          <div class="kpi-value">{{ number_format($totalUsers) }}</div>
+          <div class="kpi-sub">12% from last month</div>
+        </div>
+        <div class="kpi-icon"><i class="fas fa-user-group"></i></div>
       </div>
-      <div class="db-panel-body">
-        @php
-          $dotColors = ['#6366F1','#10B981','#F59E0B','#8B5CF6','#EF4444','#06B6D4'];
-        @endphp
-        <table class="db-table">
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th style="text-align:right;">Products</th>
-            </tr>
-          </thead>
-          <tbody>
-            @forelse($topCategories as $i => $topCategory)
-              <tr>
-                <td>
-                  <span class="db-cat-dot" style="background:{{ $dotColors[$i % count($dotColors)] }};"></span>
-                  {{ $topCategory->name }}
-                </td>
-                <td>{{ number_format($topCategory->products_count) }}</td>
-              </tr>
-            @empty
-              <tr><td colspan="2" class="db-empty">No categories yet.</td></tr>
-            @endforelse
-          </tbody>
-        </table>
+
+      <div class="kpi green">
+        <div>
+          <div class="kpi-label">Total Orders</div>
+          <div class="kpi-value">{{ number_format($totalOrders) }}</div>
+          <div class="kpi-sub">8% from last month</div>
+        </div>
+        <div class="kpi-icon"><i class="fas fa-shopping-bag"></i></div>
+      </div>
+
+      <div class="kpi purple">
+        <div>
+          <div class="kpi-label">Total Revenue</div>
+          <div class="kpi-value">${{ number_format($totalRevenue, 2) }}</div>
+          <div class="kpi-sub">23% from last month</div>
+        </div>
+        <div class="kpi-icon"><i class="fas fa-dollar-sign"></i></div>
+      </div>
+
+      <div class="kpi orange">
+        <div>
+          <div class="kpi-label">Total Products</div>
+          <div class="kpi-value">{{ number_format($totalProducts) }}</div>
+          <div class="kpi-sub">5% from last month</div>
+        </div>
+        <div class="kpi-icon"><i class="fas fa-box"></i></div>
       </div>
     </div>
-  </div>
 
+    <div class="panels">
+      <div class="panel">
+        <div class="panel-head">
+          <span>Monthly Revenue</span>
+          <span class="panel-legend">Revenue</span>
+        </div>
+        <div class="panel-body">
+          <div class="chart-box">
+            <canvas id="monthlyRevenueChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">Order Status</div>
+        <div class="panel-body">
+          @php
+            $statuses = $orderStatus ?? [];
+            $colors = [
+              'pending' => '#f59e0b',
+              'processing' => '#3b82f6',
+              'shipped' => '#6366f1',
+              'delivered' => '#10b981',
+              'cancelled' => '#ef4444',
+            ];
+          @endphp
+
+          @forelse($statuses as $status => $count)
+            <div class="status-row">
+              <div class="status-left">
+                <span class="status-dot" style="background: {{ $colors[$status] ?? '#6b7280' }}; "></span>
+                <span class="status-name">{{ ucfirst($status) }}</span>
+              </div>
+              <span class="status-pill">{{ $count }}</span>
+            </div>
+          @empty
+            <div class="empty">No orders yet</div>
+          @endforelse
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  (function () {
+    var labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var data = labels.map(function () { return 0; });
+    var monthlyRevenue = @json($monthlyRevenue ?? []);
+    var keys = Object.keys(monthlyRevenue || {});
+    if (keys.length) {
+      labels.forEach(function (m) {
+        var idx = (parseInt(m, 10) - 1);
+        if (monthlyRevenue[idx + 1] != null) {
+          data[idx] = monthlyRevenue[idx + 1];
+        }
+      });
+    }
+
+    var ctx = document.getElementById('monthlyRevenueChart');
+    if (!ctx) return;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Revenue',
+          data: data,
+          borderColor: '#7c3aed',
+          backgroundColor: function (context) {
+            var chart = context.chart;
+            var chartCtx = chart.ctx;
+            var gradient = chartCtx.createLinearGradient(0, 0, 0, 260);
+            gradient.addColorStop(0, 'rgba(124, 58, 237, 0.25)');
+            gradient.addColorStop(1, 'rgba(124, 58, 237, 0.02)');
+            return gradient;
+          },
+          borderWidth: 2,
+          pointBackgroundColor: '#ffffff',
+          pointBorderColor: '#7c3aed',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#7c3aed',
+          pointHoverBorderColor: '#ffffff',
+          pointHoverBorderWidth: 2,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#111827',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            borderColor: 'transparent',
+            borderWidth: 0,
+            cornerRadius: 6,
+            padding: 10,
+            displayColors: false,
+            callbacks: {
+              label: function (context) {
+                return '$' + Number(context.parsed.y).toLocaleString();
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: '#9ca3af',
+              font: { family: 'Inter', size: 11 },
+              maxRotation: 0
+            },
+            border: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#9ca3af',
+              font: { family: 'Inter', size: 11 },
+              callback: function (v) { return '$' + v; },
+              maxTicksLimit: 4
+            },
+            grid: {
+              color: '#f3f4f6',
+              drawBorder: false
+            },
+            border: { display: false }
+          }
+        }
+      }
+    });
+  })();
+</script>
+@endpush
