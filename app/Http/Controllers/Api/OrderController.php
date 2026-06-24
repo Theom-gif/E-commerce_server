@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -63,33 +65,37 @@ class OrderController extends Controller
         //
     }
     public function checkout(Request $request)
-{
-    $user = $request->user();
-    $cartItems = $user->cart()->with('product')->get();
+    {
+        $user = $request->user();
+        $cartItems = $user->cart()->with('product')->get();
 
-    if ($cartItems->isEmpty()) {
-        return response()->json(['message' => 'Cart is empty'], 400);
-    }
-
-    DB::transaction(function () use ($user, $cartItems, &$order) {
-        $total = $cartItems->sum(fn($item) => $item->product->price * $item->quantity);
-
-        $order = $user->orders()->create([
-            'total' => $total,
-            'status' => 'pending',
-        ]);
-
-        foreach ($cartItems as $item) {
-            $order->items()->create([
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'price' => $item->product->price,
-            ]);
+        if ($cartItems->isEmpty()) {
+            return response()->json(['message' => 'Cart is empty'], 400);
         }
 
-        $user->cart()->delete(); // clear cart after order
-    });
+        DB::transaction(function () use ($user, $cartItems, &$order) {
+            $total = $cartItems->sum(fn ($item) => $item->product->price * $item->quantity);
 
-    return response()->json(['message' => 'Order placed', 'order' => $order->load('items')]);
-}
+            $order = $user->orders()->create([
+                'total' => $total,
+                'status' => 'pending',
+            ]);
+
+            foreach ($cartItems as $item) {
+                $itemTotal = $item->product->price * $item->quantity;
+
+                $order->items()->create([
+                    'user_id' => $user->id,
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'price' => $item->product->price,
+                    'total' => $itemTotal,
+                ]);
+            }
+
+            $user->cart()->delete();
+        });
+
+        return response()->json(['message' => 'Order placed', 'order' => $order->load('items')]);
+    }
 }

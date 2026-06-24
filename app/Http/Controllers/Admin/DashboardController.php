@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Category;
-use App\Models\Review;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -42,31 +41,11 @@ class DashboardController extends Controller
             ->pluck('amount', 'month')
             ->toArray();
 
-        // User Growth (last 7 days)
-        $userGrowth = User::selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->where('created_at', '>=', now()->subDays(7))
-            ->groupBy(DB::raw('DATE(created_at)'))
-            ->orderBy('date')
-            ->pluck('count', 'date')
-            ->toArray();
-
-        // Recent Reviews
-        $recentReviews = Review::with(['user', 'product'])
-            ->latest()
-            ->take(5)
-            ->get();
-
         // Order Status Distribution
         $orderStatus = Order::selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status')
             ->toArray();
-
-        // Top Categories
-        $topCategories = Category::withCount('products')
-            ->orderBy('products_count', 'desc')
-            ->take(5)
-            ->get();
 
         return view('admin.dashboard', compact(
             'totalUsers',
@@ -78,10 +57,7 @@ class DashboardController extends Controller
             'recentOrders',
             'topProducts',
             'monthlyRevenue',
-            'userGrowth',
-            'recentReviews',
-            'orderStatus',
-            'topCategories'
+            'orderStatus'
         ));
     }
 }

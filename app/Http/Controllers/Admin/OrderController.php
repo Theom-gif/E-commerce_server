@@ -15,15 +15,36 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::with('user');
+        $selectedStatus = $request->query('status');
 
-        if ($status = $request->query('status')) {
-            $query->where('status', $status);
+        $query = Order::with(['user'])->withCount('items');
+
+        if ($selectedStatus) {
+            $query->where('status', $selectedStatus);
         }
 
-        $orders = $query->latest()->paginate(20);
+        $orders = $query->latest()->paginate(20)->withQueryString();
 
-        return view('admin.orders.index', compact('orders'));
+        $statsQuery = Order::query();
+        $totalOrders = (clone $statsQuery)->count();
+        $totalRevenue = (clone $statsQuery)->sum('total');
+        $averageOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
+        $statusCounts = (clone $statsQuery)
+            ->selectRaw('status, COUNT(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status')
+            ->toArray();
+        $recentOrders = Order::with(['user'])->withCount('items')->latest()->take(5)->get();
+
+        return view('admin.orders.index', compact(
+            'orders',
+            'selectedStatus',
+            'totalOrders',
+            'totalRevenue',
+            'averageOrderValue',
+            'statusCounts',
+            'recentOrders'
+        ));
     }
 
     public function overview()
