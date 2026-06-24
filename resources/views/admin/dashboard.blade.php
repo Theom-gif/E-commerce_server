@@ -47,108 +47,11 @@
     z-index: 1;
   }
 
-  .dashboard-hero {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
-    padding: 24px 26px;
-    border-radius: 28px;
-    color: #fff;
-    background:
-      radial-gradient(circle at top left, rgba(255, 255, 255, 0.14), transparent 35%),
-      linear-gradient(135deg, #0f172a 0%, #111827 54%, #1d4ed8 100%);
-    box-shadow: 0 22px 40px rgba(15, 23, 42, 0.18);
-    overflow: hidden;
-    margin-bottom: 16px;
-  }
-
-  .dashboard-hero > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  .dashboard-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.88);
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .dashboard-title {
-    margin: 14px 0 0;
-    font-size: clamp(28px, 3vw, 42px);
-    line-height: 1.04;
-    letter-spacing: -0.05em;
-    font-weight: 800;
-  }
-
-  .dashboard-subtitle {
-    margin: 10px 0 0;
-    max-width: 720px;
-    font-size: 14px;
-    line-height: 1.7;
-    color: rgba(255, 255, 255, 0.8);
-  }
-
-  .dashboard-actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-
-  .dashboard-action {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 11px 16px;
-    border-radius: 14px;
-    font-size: 13px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-    white-space: nowrap;
-  }
-
-  .dashboard-action:hover {
-    transform: translateY(-1px);
-  }
-
-  .dashboard-action.primary {
-    background: #ffffff;
-    color: #0f172a;
-    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
-  }
-
-  .dashboard-action.secondary {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-  }
-
   .dashboard-kpis {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
     margin-bottom: 16px;
-  }
-
-  @media (max-width: 1100px) {
-    .dashboard-hero {
-      flex-direction: column;
-    }
-
-    .dashboard-actions {
-      justify-content: flex-start;
-    }
   }
 
   @media (max-width: 980px) {
@@ -551,10 +454,6 @@
   }
 
   @media (max-width: 640px) {
-    .dashboard-hero {
-      padding: 20px;
-    }
-
     .dashboard-card-head {
       flex-direction: column;
     }
@@ -603,34 +502,6 @@
 
 <div class="dashboard-page">
   <div class="dashboard-shell">
-    <section class="dashboard-hero">
-      <div>
-        <div class="dashboard-eyebrow">
-          <i class="fas fa-chart-line"></i>
-          Store overview
-        </div>
-        <h1 class="dashboard-title">Dashboard</h1>
-        <p class="dashboard-subtitle">
-          A fast read on store performance, order flow, and customer activity with a focused admin layout.
-        </p>
-      </div>
-
-      <div class="dashboard-actions">
-        <a href="{{ route('admin.orders.index') }}" class="dashboard-action secondary">
-          <i class="fas fa-receipt"></i>
-          Orders
-        </a>
-        <a href="{{ route('admin.products.index') }}" class="dashboard-action secondary">
-          <i class="fas fa-boxes-stacked"></i>
-          Products
-        </a>
-        <a href="{{ route('admin.dashboard') }}" class="dashboard-action primary">
-          <i class="fas fa-rotate"></i>
-          Refresh
-        </a>
-      </div>
-    </section>
-
     <section class="dashboard-kpis">
       <div class="dashboard-kpi --blue">
         <div class="dashboard-kpi-head">

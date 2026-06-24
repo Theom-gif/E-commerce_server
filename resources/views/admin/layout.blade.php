@@ -18,7 +18,7 @@
     width: 100%;
   }
   .sidebar {
-    width: 260px !important;
+    width: 280px !important;
     flex-shrink: 0;
     position: sticky !important;
     top: 0;
@@ -27,7 +27,7 @@
     flex-direction: column;
     background: #ffffff;
     color: #1e293b;
-    padding: 24px 16px;
+    padding: 26px 18px;
     border-right: 1px solid #f1f5f9;
     box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.03);
     z-index: 10;
@@ -35,7 +35,7 @@
   .main {
     flex: 1;
     min-height: 100vh;
-    padding: 22px 26px;
+    padding: 24px 28px;
     margin-left: 0 !important;
     box-sizing: border-box;
   }
