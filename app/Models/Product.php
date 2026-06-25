@@ -14,6 +14,13 @@ class Product extends Model
         'price',
         'stock',
         'image',
+        'author',
+        'featured',
+        'subtitle',
+        'isbn',
+        'pages',
+        'binding',
+        'publisher',
     ];
 
     public function category()

@@ -41,6 +41,13 @@ class ProductController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
             'image' => ['nullable', 'image', 'max:4096'],
+            'author' => ['nullable', 'string', 'max:255'],
+            'featured' => ['nullable', 'boolean'],
+            'subtitle' => ['nullable', 'string', 'max:255'],
+            'isbn' => ['nullable', 'string', 'max:255'],
+            'pages' => ['nullable', 'integer', 'min:1'],
+            'binding' => ['nullable', 'string', 'max:255'],
+            'publisher' => ['nullable', 'string', 'max:255'],
         ]);
 
         $data = [
@@ -51,6 +58,13 @@ class ProductController extends Controller
             'price' => $validated['price'],
             'stock' => $validated['stock'] ?? 0,
             'image' => $this->processProductImage($request->file('image')),
+            'author' => $validated['author'] ?? null,
+            'featured' => $request->has('featured'),
+            'subtitle' => $validated['subtitle'] ?? null,
+            'isbn' => $validated['isbn'] ?? null,
+            'pages' => $validated['pages'] ?? null,
+            'binding' => $validated['binding'] ?? null,
+            'publisher' => $validated['publisher'] ?? null,
         ];
 
         Product::create($data);
@@ -80,6 +94,13 @@ class ProductController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
             'image' => ['nullable', 'image', 'max:4096'],
+            'author' => ['nullable', 'string', 'max:255'],
+            'featured' => ['nullable', 'boolean'],
+            'subtitle' => ['nullable', 'string', 'max:255'],
+            'isbn' => ['nullable', 'string', 'max:255'],
+            'pages' => ['nullable', 'integer', 'min:1'],
+            'binding' => ['nullable', 'string', 'max:255'],
+            'publisher' => ['nullable', 'string', 'max:255'],
         ]);
 
         $product->category_id = $validated['category_id'];
@@ -89,6 +110,13 @@ class ProductController extends Controller
         $product->price = $validated['price'];
         $product->stock = $validated['stock'] ?? 0;
         $product->image = $this->processProductImage($request->file('image'), $product->image);
+        $product->author = $validated['author'] ?? null;
+        $product->featured = $request->has('featured');
+        $product->subtitle = $validated['subtitle'] ?? null;
+        $product->isbn = $validated['isbn'] ?? null;
+        $product->pages = $validated['pages'] ?? null;
+        $product->binding = $validated['binding'] ?? null;
+        $product->publisher = $validated['publisher'] ?? null;
 
         $product->save();
 

@@ -332,7 +332,7 @@
       <span class="pt-pagination-info">
         Showing {{ $products->firstItem() }}–{{ $products->lastItem() }} of {{ $products->total() }} products
       </span>
-      {{ $products->withQueryString()->links() }}
+      {{ $products->withQueryString()->links('admin.pagination') }}
     </div>
   </div>
 

@@ -7,230 +7,7 @@
   <p>Add product to catalog.</p>
 @endsection
 
-@section('styles')
-<style>
-  /* ── Page layout ──────────────────────────────────── */
-  .product-create {
-    max-width: 660px;
-    margin: 0 auto;
-    padding: 2rem 1rem 6rem;
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
-  }
-
-  .product-create .page-eyebrow {
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #9CA3AF;
-    margin: 0 0 4px;
-  }
-
-  .product-create .page-title {
-    font-size: 22px;
-    font-weight: 600;
-    color: #111827;
-    margin: 0 0 1.75rem;
-  }
-
-  /* ── Form card ────────────────────────────────────── */
-  .form-panel {
-    background: #ffffff;
-    border: 0.5px solid #E5E7EB;
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  }
-
-  /* ── Section labels ───────────────────────────────── */
-  .form-section-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: #9CA3AF;
-    padding: 0.9rem 1.5rem 0.5rem;
-    border-bottom: 0.5px solid #F3F4F6;
-    margin: 0;
-    background: #FAFAFA;
-  }
-
-  /* ── Fields container ─────────────────────────────── */
-  .form-fields {
-    padding: 0 1.5rem 0.5rem;
-  }
-
-  /* ── Individual field ─────────────────────────────── */
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    padding: 0.85rem 0;
-    border-bottom: 0.5px solid #F3F4F6;
-  }
-
-  .field:last-child {
-    border-bottom: none;
-  }
-
-  .field .label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #6B7280;
-    letter-spacing: 0.02em;
-  }
-
-  .field .label .req {
-    color: #5B6AF0;
-    margin-left: 2px;
-  }
-
-  /* ── Inputs, select, textarea ─────────────────────── */
-  .field input[type="text"],
-  .field input[type="number"],
-  .field select,
-  .field textarea {
-    border: 0.5px solid #D1D5DB;
-    border-radius: 8px;
-    padding: 9px 12px;
-    font-size: 14px;
-    font-family: inherit;
-    color: #111827;
-    background: #ffffff;
-    outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .field input[type="text"]:focus,
-  .field input[type="number"]:focus,
-  .field select:focus,
-  .field textarea:focus {
-    border-color: #5B6AF0;
-    box-shadow: 0 0 0 3px rgba(91, 106, 240, 0.12);
-  }
-
-  .field input::placeholder,
-  .field textarea::placeholder {
-    color: #D1D5DB;
-  }
-
-  .field textarea {
-    resize: vertical;
-    min-height: 96px;
-    line-height: 1.6;
-  }
-
-  /* ── Two-column row (price + stock) ───────────────── */
-  .field-row-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    padding: 0.85rem 1.5rem;
-    border-bottom: 0.5px solid #F3F4F6;
-  }
-
-  .field-row-2 .field {
-    padding: 0;
-    border-bottom: none;
-  }
-
-  /* ── File upload zone ─────────────────────────────── */
-  .file-upload-zone {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    border: 1.5px dashed #D1D5DB;
-    border-radius: 10px;
-    padding: 1.5rem 1rem;
-    text-align: center;
-    cursor: pointer;
-    background: #FAFAFA;
-    transition: border-color 0.15s, background 0.15s;
-  }
-
-  .file-upload-zone:hover {
-    border-color: #5B6AF0;
-    background: #F5F6FF;
-  }
-
-  .file-upload-zone svg {
-    color: #9CA3AF;
-  }
-
-  .file-upload-zone .upload-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #374151;
-  }
-
-  .file-upload-zone .upload-hint {
-    font-size: 11px;
-    color: #9CA3AF;
-    margin: 0;
-  }
-
-  .file-upload-zone input[type="file"] {
-    display: none;
-  }
-
-  /* ── Sticky action bar ────────────────────────────── */
-  .form-action-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.9rem 1.5rem;
-    border-top: 0.5px solid #E5E7EB;
-    background: #ffffff;
-    position: sticky;
-    bottom: 0;
-  }
-
-  /* ── Buttons ──────────────────────────────────────── */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: inherit;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.12s, border-color 0.12s;
-    line-height: 1;
-  }
-
-  .btn-secondary {
-    background: #ffffff;
-    border: 0.5px solid #D1D5DB;
-    color: #6B7280;
-  }
-
-  .btn-secondary:hover {
-    background: #F9FAFB;
-    border-color: #9CA3AF;
-    color: #374151;
-  }
-
-  .btn-primary {
-    background: #5B6AF0;
-    border: none;
-    color: #ffffff;
-  }
-
-  .btn-primary:hover {
-    background: #4857E8;
-  }
-
-  .btn-primary:active {
-    transform: scale(0.98);
-  }
-</style>
-@endsection
+@include('admin.products._styles')
 
 @section('content')
   <div class="product-create">
@@ -274,6 +51,17 @@
             <label class="label" for="description">Description</label>
             <textarea id="description" name="description"
               rows="4" placeholder="What makes this product special…">{{ old('description') }}</textarea>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field" style="border-bottom:none; padding:0;">
+              <label class="label" for="author">Author / Brand</label>
+              <input id="author" type="text" name="author" value="{{ old('author') }}" placeholder="e.g. John Doe">
+            </div>
+            <div class="field" style="border-bottom:none; padding:0; display:flex; flex-direction:row; align-items:center; gap:10px; margin-top: 28px;">
+              <input id="featured" type="checkbox" name="featured" value="1" {{ old('featured') ? 'checked' : '' }} style="width:auto;">
+              <label class="label" for="featured" style="margin:0; cursor:pointer;">Mark as Featured Product</label>
+            </div>
           </div>
         </div>
 
