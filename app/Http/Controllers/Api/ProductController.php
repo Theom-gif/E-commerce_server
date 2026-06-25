@@ -4,9 +4,40 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    /**
+     * Resolve the product image to a full URL.
+     * - If already an absolute http(s) URL → return as-is
+     * - If a local storage path → convert to storage URL
+     * - Otherwise → return null (fallback handled by frontend)
+     */
+    private function resolveImageUrl(?string $image): ?string
+    {
+        if (!$image) {
+            return null;
+        }
+
+        // Already an absolute URL (e.g. Unsplash, CDN, etc.)
+        if (preg_match('/^https?:\/\//i', $image)) {
+            return $image;
+        }
+
+        // Local storage path → convert to full public URL
+        return Storage::disk('public')->url($image);
+    }
+
+    /**
+     * Append resolved image_url to a product array.
+     */
+    private function withImageUrl(array $product): array
+    {
+        $product['image'] = $this->resolveImageUrl($product['image'] ?? null);
+        return $product;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -26,7 +57,15 @@ class ProductController extends Controller
             });
         }
 
-        return response()->json($query->latest()->paginate(12));
+        $paginated = $query->latest()->paginate(12);
+
+        // Resolve image URLs in the paginated data
+        $paginated->getCollection()->transform(function ($product) {
+            $product->image = $this->resolveImageUrl($product->image);
+            return $product;
+        });
+
+        return response()->json($paginated);
     }
 
     /**
@@ -51,6 +90,7 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::with('category', 'reviews.user')->findOrFail($id);
+        $product->image = $this->resolveImageUrl($product->image);
         return response()->json($product);
     }
 
@@ -77,6 +117,7 @@ class ProductController extends Controller
     {
         //
     }
+
     public function search($keyword)
     {
         $products = Product::with('category')
@@ -85,6 +126,13 @@ class ProductController extends Controller
             ->limit(12)
             ->get();
 
+        // Resolve image URLs
+        $products->transform(function ($product) {
+            $product->image = $this->resolveImageUrl($product->image);
+            return $product;
+        });
+
         return response()->json($products);
     }
 }
+
