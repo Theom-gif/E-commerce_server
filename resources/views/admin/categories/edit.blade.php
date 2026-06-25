@@ -59,7 +59,7 @@
     color: #fff;
     background:
       radial-gradient(circle at top left, rgba(255, 255, 255, 0.14), transparent 34%),
-      linear-gradient(135deg, #0f172a 0%, #111827 55%, #059669 100%);
+      linear-gradient(135deg, #0f2a1c 0%, #111827 55%, #059669 100%);
     box-shadow: 0 20px 38px rgba(15, 23, 42, 0.16);
     overflow: hidden;
   }
@@ -125,13 +125,13 @@
 
   .category-action.secondary {
     color: #fff;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.43);
     border: 1px solid rgba(255, 255, 255, 0.16);
   }
 
   .category-action.primary {
     background: #ffffff;
-    color: #0f172a;
+    color: #184318;
     box-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
   }
 
@@ -408,13 +408,13 @@
   <div class="category-shell">
     <section class="category-hero">
       <div>
-        <div class="category-eyebrow">
+        {{-- <div class="category-eyebrow">
           <i class="fas fa-pen-to-square"></i>
           Category editor
         </div>
         <h1>Edit Category</h1>
         <p>Update the category name and keep your catalog structure organized without leaving the admin panel.</p>
-      </div>
+      </div> --}}
 
       <div class="category-actions">
         <a href="{{ route('admin.categories.index') }}" class="category-action secondary">

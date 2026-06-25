@@ -670,30 +670,6 @@
 
 <div class="orders-page">
   <div class="orders-shell">
-    <section class="orders-hero">
-      <div>
-        <div class="orders-eyebrow">
-          <i class="fas fa-receipt"></i>
-          Order management
-        </div>
-        <h1 class="orders-title">Orders</h1>
-        <p class="orders-subtitle">
-          Track order activity, monitor revenue, and manage fulfillment from one focused admin workspace.
-        </p>
-      </div>
-
-      <div class="orders-actions">
-        <a href="{{ route('admin.dashboard') }}" class="orders-action secondary">
-          <i class="fas fa-chart-pie"></i>
-          Dashboard
-        </a>
-        <a href="{{ route('admin.orders.index') }}" class="orders-action primary">
-          <i class="fas fa-rotate"></i>
-          Refresh orders
-        </a>
-      </div>
-    </section>
-
     <section class="orders-kpis">
       <div class="orders-kpi --blue">
         <div class="orders-kpi-head">

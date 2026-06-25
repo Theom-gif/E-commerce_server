@@ -100,7 +100,26 @@
   .pt-table tbody tr:hover { background: #F8F7FF; }
   .pt-table tbody td { padding: 13px 16px; font-size: 13px; color: #1a1a2e; vertical-align: middle; }
 
-  .pt-id   { font-size: 11.5px; font-family: 'SFMono-Regular',monospace; color: #A0A8C0; font-weight: 600; }
+  .pt-image-cell { width: 74px; }
+  .pt-thumb,
+  .pt-thumb-placeholder {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid #E2E6F0;
+    background: #F8FAFC;
+  }
+  .pt-thumb {
+    display: block;
+    object-fit: cover;
+  }
+  .pt-thumb-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #94A3B8;
+    font-size: 16px;
+  }
   .pt-name { font-weight: 600; color: #1a1a2e; }
   .pt-price{ font-weight: 700; color: #1a1a2e; }
 
@@ -217,7 +236,7 @@
     <table class="pt-table">
       <thead>
         <tr>
-          <th>#ID</th>
+          <th>Image</th>
           <th>Product name</th>
           <th>Category</th>
           <th>Price</th>
@@ -236,7 +255,19 @@
               : 'cat-default';
           @endphp
           <tr>
-            <td class="pt-id">#{{ $product->id }}</td>
+            <td class="pt-image-cell">
+              @if($product->image)
+                <img
+                  src="{{ asset('storage/' . $product->image) }}"
+                  alt="{{ $product->name }}"
+                  class="pt-thumb"
+                >
+              @else
+                <span class="pt-thumb-placeholder" title="No image">
+                  <i class="fas fa-image"></i>
+                </span>
+              @endif
+            </td>
 
             <td><span class="pt-name">{{ $product->name }}</span></td>
 

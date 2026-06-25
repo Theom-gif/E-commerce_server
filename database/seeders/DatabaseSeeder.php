@@ -23,7 +23,13 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
         ]);
 
-        // User::factory(10)->create();
+        // Prefilled user for BookBase frontend
+        User::create([
+            'name' => 'Book Collector',
+            'email' => 'collector@bookbase.org',
+            'password' => bcrypt('parchment77'),
+            'role' => 'user',
+        ]);
 
         User::factory()->create([
             'name' => 'Test User',
