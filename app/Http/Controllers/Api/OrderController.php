@@ -4,37 +4,22 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        return response()->json($request->user()->orders()->with('items.product')->latest()->get());
+        return response()->json(
+            $request->user()
+                ->orders()
+                ->with('items.product')
+                ->latest()
+                ->get()
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(Request $request, Order $order)
     {
         abort_unless($order->user_id === $request->user()->id, 403);
@@ -42,29 +27,6 @@ class OrderController extends Controller
         return response()->json($order->load('items.product'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Order $order)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Order $order)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Order $order)
-    {
-        //
-    }
     public function checkout(Request $request)
     {
         $user = $request->user();
@@ -74,6 +36,8 @@ class OrderController extends Controller
             return response()->json(['message' => 'Cart is empty'], 400);
         }
 
+        $order = null;
+
         DB::transaction(function () use ($user, $cartItems, &$order) {
             $total = $cartItems->sum(fn ($item) => $item->product->price * $item->quantity);
 
@@ -82,21 +46,42 @@ class OrderController extends Controller
                 'status' => 'pending',
             ]);
 
-            foreach ($cartItems as $item) {
-                $itemTotal = $item->product->price * $item->quantity;
+            $orderItems = $cartItems->map(fn ($item) => [
+                'user_id' => $user->id,
+                'product_id' => $item->product_id,
+                'quantity' => $item->quantity,
+                'price' => $item->product->price,
+                'total' => $item->product->price * $item->quantity,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])->toArray();
 
-                $order->items()->create([
-                    'user_id' => $user->id,
-                    'product_id' => $item->product_id,
-                    'quantity' => $item->quantity,
-                    'price' => $item->product->price,
-                    'total' => $itemTotal,
-                ]);
-            }
-
+            $order->items()->insert($orderItems);
             $user->cart()->delete();
         });
 
-        return response()->json(['message' => 'Order placed', 'order' => $order->load('items.product')]);
+        // Bust admin caches
+        Cache::forget('admin.orders.stats');
+        Cache::forget('admin.dashboard.stats');
+
+        return response()->json([
+            'message' => 'Order placed',
+            'order' => $order->load('items.product'),
+        ]);
+    }
+
+    public function complete(Request $request, Order $order)
+    {
+        abort_unless($order->user_id === $request->user()->id, 403);
+
+        $order->update(['status' => 'completed']);
+
+        Cache::forget('admin.orders.stats');
+        Cache::forget('admin.dashboard.stats');
+
+        return response()->json([
+            'message' => 'Order marked as completed',
+            'order' => $order,
+        ]);
     }
 }

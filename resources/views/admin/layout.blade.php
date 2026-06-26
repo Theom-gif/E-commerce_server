@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@yield('title', 'Admin')</title>
+  <title>@yield('title', 'Admin') - BookBase</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -50,7 +50,7 @@
           <i class="fas fa-cubes"></i>
         </div>
         <div class="brand-text">
-          <span class="brand-name">EcoStore</span>
+          <span class="brand-name">BookBase</span>
           <span class="brand-badge">Admin Panel</span>
         </div>
       </div>

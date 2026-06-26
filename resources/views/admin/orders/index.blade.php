@@ -496,6 +496,18 @@
     color: #fff;
   }
 
+  .order-icon-btn.complete {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #059669;
+  }
+
+  .order-icon-btn.complete:hover {
+    background: #059669;
+    border-color: #059669;
+    color: #fff;
+  }
+
   .orders-empty {
     padding: 56px 24px;
     text-align: center;
@@ -807,6 +819,20 @@
                       <a href="{{ route('admin.orders.show', $order) }}" class="order-icon-btn" title="View order">
                         <i class="fas fa-eye"></i>
                       </a>
+                      @if(strtolower($order->status) !== 'completed' && strtolower($order->status) !== 'delivered')
+                        <form
+                          action="{{ route('admin.orders.complete', $order) }}"
+                          method="POST"
+                          onsubmit="return confirm('Mark this order as successful/completed?');"
+                          style="margin: 0;"
+                        >
+                          @csrf
+                          @method('PATCH')
+                          <button type="submit" class="order-icon-btn complete" title="Mark as completed">
+                            <i class="fas fa-check"></i>
+                          </button>
+                        </form>
+                      @endif
                       <form
                         action="{{ route('admin.orders.destroy', $order) }}"
                         method="POST"

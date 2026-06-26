@@ -10,9 +10,6 @@ class ProductController extends Controller
 {
     /**
      * Resolve the product image to a full URL.
-     * - If already an absolute http(s) URL → return as-is
-     * - If a local storage path → convert to storage URL
-     * - Otherwise → return null (fallback handled by frontend)
      */
     private function resolveImageUrl(?string $image): ?string
     {
@@ -20,27 +17,24 @@ class ProductController extends Controller
             return null;
         }
 
-        // Already an absolute URL (e.g. Unsplash, CDN, etc.)
         if (preg_match('/^https?:\/\//i', $image)) {
             return $image;
         }
 
-        // Local storage path → convert to full public URL
         return Storage::disk('public')->url($image);
     }
 
     /**
-     * Append resolved image_url to a product array.
+     * Apply resolved image URLs to a collection of products.
      */
-    private function withImageUrl(array $product): array
+    private function resolveImages($products): void
     {
-        $product['image'] = $this->resolveImageUrl($product['image'] ?? null);
-        return $product;
+        $products->transform(function ($product) {
+            $product->image = $this->resolveImageUrl($product->image);
+            return $product;
+        });
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $query = Product::with('category');
@@ -58,64 +52,17 @@ class ProductController extends Controller
         }
 
         $paginated = $query->latest()->paginate(12);
-
-        // Resolve image URLs in the paginated data
-        $paginated->getCollection()->transform(function ($product) {
-            $product->image = $this->resolveImageUrl($product->image);
-            return $product;
-        });
+        $this->resolveImages($paginated->getCollection());
 
         return response()->json($paginated);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         $product = Product::with('category', 'reviews.user')->findOrFail($id);
         $product->image = $this->resolveImageUrl($product->image);
+
         return response()->json($product);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Product $product)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Product $product)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Product $product)
-    {
-        //
     }
 
     public function search($keyword)
@@ -126,13 +73,8 @@ class ProductController extends Controller
             ->limit(12)
             ->get();
 
-        // Resolve image URLs
-        $products->transform(function ($product) {
-            $product->image = $this->resolveImageUrl($product->image);
-            return $product;
-        });
+        $this->resolveImages($products);
 
         return response()->json($products);
     }
 }
-
